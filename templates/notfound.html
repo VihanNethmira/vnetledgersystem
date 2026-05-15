@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Page Not Found | VNET SHOP</title>
+    <style>
+        :root {
+            --vnet-blue: #2563eb;
+            --vnet-dark: #0a0e17;
+            --vnet-light: #f4f7fe;
+            --text-main: #333;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: var(--vnet-light);
+            font-family: 'Segoe UI', sans-serif;
+            color: var(--text-main);
+        }
+
+        .container {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.05);
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .vnet-brand {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--vnet-blue);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .error-code {
+            font-size: 80px;
+            font-weight: 900;
+            margin: 10px 0;
+            color: var(--vnet-dark);
+            opacity: 0.1;
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .content {
+            position: relative;
+            z-index: 1;
+        }
+
+        h2 {
+            font-size: 22px;
+            margin-bottom: 10px;
+            color: var(--vnet-dark);
+        }
+
+        p {
+            font-size: 15px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 25px;
+        }
+
+        .btn-back {
+            display: inline-block;
+            padding: 14px 30px;
+            background-color: #0f172a;
+            color: white;
+            border-radius: 12px;
+            text-decoration: none;
+            font-weight: 600;
+            transition: 0.3s ease;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .btn-back:hover {
+            background-color: #2563eb;
+            color: #ffffff;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 132, 255, 0.3);
+        }
+
+        .footer-text {
+            margin-top: 30px;
+            font-size: 11px;
+            color: #bbb;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="error-code">404</div>
+        <div class="content">
+            <div class="vnet-brand">VNET SHOP</div>
+            <h2>Data Not Found</h2>
+            <p>Sorry, the records for the selected month or user could not be located in our secure ledger.</p>
+            
+            <button onclick="window.history.back()" class="btn-back">← Go Back to Ledger</button>
+            
+            <div class="footer-text">VNET Ledger System 2.0</div>
+        </div>
+    </div>
+
+</body>
+</html>

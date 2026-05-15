@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Database History</title>
+    <style>
+        body { font-family: sans-serif; background: #f4f7f6; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .box { background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); text-align: center; width: 350px; }
+        .file-link { display: block; padding: 12px; margin: 8px 0; background: #1e293b; color: white; text-decoration: none; border-radius: 4px; font-weight: bold; }
+        .back { display: block; margin-top: 20px; color: #666; text-decoration: none; font-size: 13px; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>Select Month File</h2>
+        {% for file in files %}
+            <a href="/set_month/{{ file }}" class="file-link">{{ file.replace('.db', '') }}</a>
+        {% endfor %}
+        <a href="/" class="back">← Back to Ledger</a>
+    </div>
+</body>
+</html>

@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNET Ledger</title>
+    <style>
+        body { font-family: sans-serif;
+            background: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .box { background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 100%;
+            max-width: 400px;
+        }
+        .month-banner { background: #1e293b;
+            color: white; padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-weight: bold;
+        }
+        .live-tag { background: #10b981;
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            vertical-align: middle;
+            margin-left: 5px;
+        }
+        
+               /* Container eka center karanna saha margin danna */
+.user-link-wrapper {
+  display: block;
+  margin: 15px auto; /* Button athara ida */
+  width: 95%; /* Button eke palala */
+  text-decoration: none;
+}
+
+.pushable {
+  position: relative;
+  background: transparent;
+  padding: 0px;
+  border: none;
+  cursor: pointer;
+  outline-offset: 4px;
+  transition: filter 250ms;
+  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+  display: block;
+}
+
+.shadow {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.15); /* Poddak dark kala */
+  border-radius: 12px;
+  filter: blur(2px);
+  will-change: transform;
+  transform: translateY(2px);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+}
+
+.edge {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  border-radius: 12px;
+  background: linear-gradient(
+    to right,
+    #047857 0%, /* Dark Green (Edge) */
+    #059669 8%,
+    #059669 92%,
+    #047857 100%
+  );
+}
+
+.front {
+  display: block;
+  position: relative;
+  border-radius: 12px;
+  background: #10b981; /* Oyaage ledger eke green paata */
+  padding: 12px 20px;
+  color: white;
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  font-size: 1.1rem;
+  transform: translateY(-4px);
+  transition: transform 600ms cubic-bezier(0.3, 0.7, 0.4, 1);
+  text-align: center;
+}
+
+.pushable:hover {
+  filter: brightness(110%);
+}
+
+.pushable:hover .front {
+  transform: translateY(-6px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+
+.pushable:active .front {
+  transform: translateY(-2px);
+  transition: transform 34ms;
+}
+
+.pushable:hover .shadow {
+  transform: translateY(4px);
+  transition: transform 250ms cubic-bezier(0.3, 0.7, 0.4, 1.5);
+}
+
+.pushable:active .shadow {
+  transform: translateY(1px);
+  transition: transform 34ms;
+}        
+        
+        .btn { padding: 15px;
+            background: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            width: 100%;
+            text-decoration: none;
+            display: block;
+            font-weight: bold;
+            box-sizing: border-box;
+            margin-bottom: 10px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        hr { border: 0;
+            border-top: 1px solid #eee;
+            margin: 20px 0;
+        }
+        input { padding: 12px;
+            width: 100%;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            box-sizing: border-box; 
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div style="text-align: right;"><a href="/logout" style="color: red; text-decoration: none; font-size: 10px;">LOGOUT 🔒</a></div>
+        <h2 style="margin-top: 0;">VNET Ledger</h2>
+        
+        <div class="month-banner">
+            {{ current_month.replace('.db', '').replace('_', ' ') }} 
+            {% if is_live %}<span class="live-tag">LIVE</span>{% endif %}
+        </div>
+
+        <a href="/admin" class="btn" style="background: #1e293b; margin-bottom: 15px;">📊 Admin Dashboard</a>
+
+        {% if not is_live %}
+        <a href="/set_month/LIVE" class="btn" style="background: #10b981;">🔄 Switch to Current Month</a>
+        {% endif %}
+        
+        <a href="/history" class="btn" style="background: #64748b;">📂 View Database History</a>
+        
+        <hr>
+        {% for user in users %}
+        <a href="/user/{{ user }}" class="pushable user-link-wrapper">
+        <span class="shadow"></span>
+        <span class="edge"></span>
+        <span class="front">
+        {{ user }}
+        </span>
+        </a>
+        {% endfor %}
+        <hr>
+        
+        <form action="/add_user" method="POST">
+            <input type="text" name="new_username" placeholder="Add New Person" required>
+            <button type="submit" class="btn">Add User</button>
+        </form>
+    </div>
+</body>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNET Management - Login</title>
+    <style>
+        :root {
+            --vnet-blue: #2563eb;
+            --vnet-dark: #0f172a;
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --border: #e2e8f0;
+        }
+
+        /* Dark Mode colors */
+        body.dark-mode {
+            --bg-page: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f1f5f9;
+            --border: #334155;
+        }
+
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-page);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            transition: 0.3s;
+            color: var(--text-main);
+        }
+
+        .login-box {
+            background: var(--bg-card);
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+            text-align: center;
+            width: 100%;
+            max-width: 380px;
+            border: 1px solid var(--border);
+        }
+
+        .logo-area {
+            font-size: 24px;
+            font-weight: 800;
+            color: var(--vnet-blue);
+            margin-bottom: 10px;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            font-size: 14px;
+            color: #64748b;
+            margin-bottom: 30px;
+        }
+
+        input[type="password"] {
+            padding: 14px;
+            width: 100%;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            display: block;
+            margin: 15px auto;
+            background: var(--bg-page);
+            color: var(--text-main);
+            box-sizing: border-box;
+            outline: none;
+            transition: 0.3s;
+        }
+
+        input[type="password"]:focus {
+            border-color: var(--vnet-blue);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        button {
+            padding: 14px;
+            background: var(--vnet-blue);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            width: 100%;
+            font-size: 16px;
+            transition: 0.3s;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+            transform: translateY(-1px);
+        }
+
+        /* Theme Switcher in Login */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="theme-toggle" id="themeBtn">🌓</div>
+
+<div class="login-box">
+    <div class="logo-area">VNET SHOP</div>
+    <div class="subtitle">Management Ledger System</div>
+    
+    <form action="/login" method="POST">
+        <input type="password" name="password" placeholder="Enter Master Password" required autofocus>
+        <button type="submit">Secure Login</button>
+    </form>
+    
+    <div style="margin-top: 25px; font-size: 11px; color: #94a3b8;">
+        &copy; 2026 VNET SECURITY ACCESS
+    </div>
+</div>
+
+<script>
+    const themeBtn = document.getElementById('themeBtn');
+    const body = document.body;
+    const currentTheme = localStorage.getItem('theme');
+
+    if (currentTheme === 'dark-mode') {
+        body.classList.add('dark-mode');
+    }
+
+    themeBtn.addEventListener('click', () => {
+        body.classList.toggle('dark-mode');
+        const theme = body.classList.contains('dark-mode') ? 'dark-mode' : 'light-mode';
+        localStorage.setItem('theme', theme);
+    });
+</script>
+
+</body>
+</html>
