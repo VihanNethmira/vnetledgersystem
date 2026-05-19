@@ -6,110 +6,124 @@
     <title>VNET Management - Login</title>
     <style>
         :root {
-            --vnet-blue: #2563eb;
-            --vnet-dark: #0f172a;
-            --bg-page: #f1f5f9;
-            --bg-card: #ffffff;
-            --text-main: #1e293b;
-            --border: #e2e8f0;
-        }
+    --vnet-blue: #2563eb;
+    --vnet-dark: #0f172a;
+    --bg-page: #f1f5f9;
+    --bg-card: #ffffff;
+    --text-main: #1e293b;
+    --border: #e2e8f0;
+}
 
-        /* Dark Mode colors */
-        body.dark-mode {
-            --bg-page: #0f172a;
-            --bg-card: #1e293b;
-            --text-main: #f1f5f9;
-            --border: #334155;
-        }
+/* Dark Mode colors */
+body.dark-mode {
+    --bg-page: #0f172a;
+    --bg-card: #1e293b;
+    --text-main: #f1f5f9;
+    --border: #334155;
+}
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-page);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            transition: 0.3s;
-            color: var(--text-main);
-        }
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--bg-page);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh; /* height වෙනුවට min-height යෙදීමෙන් scroll වීමට ඉඩ සලසයි */
+    margin: 0;
+    padding: 20px; /* පෝන් එකේ දෙපැත්තට තද වීම වළක්වයි */
+    transition: 0.3s;
+    color: var(--text-main);
+    box-sizing: border-box;
+}
 
-        .login-box {
-            background: var(--bg-card);
-            padding: 40px;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            text-align: center;
-            width: 100%;
-            max-width: 380px;
-            border: 1px solid var(--border);
-        }
+.login-box {
+    background: var(--bg-card);
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    text-align: center;
+    width: 100%;
+    max-width: 460px; /* ලොකු ස්ක්‍රීන් වලදී පමණක් උපරිම සීමාව තබයි */
+    border: 1px solid var(--border);
+    box-sizing: border-box;
+}
 
-        .logo-area {
-            font-size: 24px;
-            font-weight: 800;
-            color: var(--vnet-blue);
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
+.logo-area {
+    font-size: clamp(24px, 5vw, 24px); /* ස්ක්‍රීන් එකේ ප්‍රමාණය අනුව අකුරු වල විශාලත්වය වෙනස් වේ */
+    font-weight: 800;
+    color: var(--vnet-blue);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
 
-        .subtitle {
-            font-size: 14px;
-            color: #64748b;
-            margin-bottom: 30px;
-        }
+.subtitle {
+    font-size: 14px;
+    color: #64748b;
+    margin-bottom: 30px;
+}
 
-        input[type="password"] {
-            padding: 14px;
-            width: 100%;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            display: block;
-            margin: 15px auto;
-            background: var(--bg-page);
-            color: var(--text-main);
-            box-sizing: border-box;
-            outline: none;
-            transition: 0.3s;
-        }
+form {
+    width: 100%;
+}
 
-        input[type="password"]:focus {
-            border-color: var(--vnet-blue);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
-        }
+input[type="password"] {
+    padding: 13px;
+    width: 100%; /* පෙට්ටියට සාපේක්ෂව සම්පූර්ණ පළල ගනී */
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    display: block;
+    margin-bottom: 25px;
+    background: var(--bg-page);
+    color: var(--text-main);
+    box-sizing: border-box;
+    outline: none;
+    font-size: 13px; /* Mobile වලදී Zoom වීම වැළැක්වීමට 16px භාවිතා කිරීම අනිවාර්යයි */
+    transition: 0.3s;
+}
 
-        button {
-            padding: 14px;
-            background: var(--vnet-blue);
-            color: white;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: bold;
-            width: 100%;
-            font-size: 16px;
-            transition: 0.3s;
-            margin-top: 10px;
-        }
+button {
+    padding: 13px;
+    background: var(--vnet-blue);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    width: 100%;
+    font-size: 16px;
+    transition: 0.3s;
+}
 
-        button:hover {
-            background: #1d4ed8;
-            transform: translateY(-1px);
-        }
+button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+}
 
-        /* Theme Switcher in Login */
-        .theme-toggle {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            cursor: pointer;
-            background: var(--bg-card);
-            padding: 10px;
-            border-radius: 50%;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-            border: 1px solid var(--border);
-            font-size: 20px;
-        }
+input[type="password"]:focus {
+    border-color: var(--vnet-blue);
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+/* Theme Switcher Button */
+.theme-toggle {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    cursor: pointer;
+    background: var(--bg-card);
+    padding: 10px;
+    border-radius: 50%;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    border: 1px solid var(--border);
+    font-size: 20px;
+    z-index: 1000;
+}
+
+/* කුඩා තිර සඳහා අමතර වෙනස්කම් */
+@media (max-width: 480px) {
+.login-box {
+    padding: 30px 20px;}
+}
     </style>
 </head>
 <body>
