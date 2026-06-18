@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VNET Shop - Statement</title>
+    <style>
+        :root { 
+            --vnet-blue: #2563eb; 
+            --vnet-dark: #0f172a; 
+            --success: #16a34a; 
+            --danger: #dc2626; 
+            --border: #e2e8f0; 
+        }
+
+        body { 
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; 
+            background: #f1f5f9; 
+            padding: 10px; 
+            margin: 0; 
+            color: #1e293b; 
+        }
+
+        .container { 
+            max-width: 850px; 
+            margin: auto; 
+            background: white; 
+            border-radius: 12px; 
+            overflow: hidden; 
+            box-shadow: 0 10px 15px rgba(0,0,0,0.1); 
+        }
+
+        .brand-header { 
+            background: var(--vnet-dark); 
+            color: white; 
+            padding: 12px 20px; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+        }
+
+        .brand-logo { font-size: 1.1rem; font-weight: 800; }
+        .brand-logo span { color: var(--vnet-blue); }
+
+        .period-selector { 
+            background: #f8fafc; 
+            padding: 10px 20px; 
+            border-bottom: 1px solid var(--border); 
+            display: flex; 
+            flex-wrap: wrap; 
+            align-items: center; 
+            gap: 8px; 
+        }
+
+        .period-selector select { 
+            padding: 6px 10px; 
+            border-radius: 6px; 
+            border: 1px solid var(--border); 
+            font-weight: 600; 
+            font-size: 0.85rem; 
+            background: white; 
+            cursor: pointer;
+            flex-grow: 1;
+        }
+
+        .account-summary { 
+            padding: 15px 20px; 
+            display: flex; 
+            flex-wrap: wrap;
+            justify-content: space-between; 
+            align-items: center; 
+            gap: 10px;
+            border-bottom: 1px solid var(--border); 
+        }
+
+        .label { font-size: 0.65rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .balance-box { 
+            text-align: right; 
+            background: #f8fafc; 
+            padding: 8px 15px; 
+            border-radius: 8px; 
+            border: 1px solid var(--border);
+        }
+
+        .balance-val { font-size: 1.2rem; font-weight: 700; color: var(--vnet-dark); display: block; }
+
+        .ledger-wrapper { 
+            display: flex; 
+            flex-direction: row; 
+        }
+
+        .ledger-col { flex: 1; }
+
+        .credit-side { border-right: 1px solid var(--border); }
+
+        .side-title { 
+            background: #f8fafc; 
+            padding: 8px; 
+            text-align: center; 
+            font-size: 0.7rem; 
+            font-weight: 700; 
+            color: #475569; 
+            border-bottom: 1px solid var(--border); 
+            text-transform: uppercase; 
+        }
+
+        /* Small Font Table Values */
+        .entry-row { 
+            display: flex; 
+            justify-content: space-between; 
+            padding: 10px 15px; 
+            border-bottom: 1px solid #f1f5f9; 
+            align-items: center; 
+        }
+
+        .entry-info { display: flex; flex-direction: column; }
+        .entry-date { font-size: 0.6rem; color: #94a3b8; font-weight: 600; }
+        .entry-desc { color: #334155; font-size: 0.8rem; font-weight: 500; }
+        .amt-credit { color: var(--danger); font-weight: 700; font-size: 0.85rem; }
+        .amt-debit { color: var(--success); font-weight: 700; font-size: 0.85rem; }
+
+        /* Theme Switcher in Login */
+        .theme-toggle {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            cursor: pointer;
+            background: var(--bg-card);
+            padding: 10px;
+            border-radius: 50%;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border: 1px solid var(--border);
+            font-size: 20px;
+        }
+
+        /* Your Requested Responsive Size Fixes */
+        @media (max-width: 600px) {
+            .ledger-wrapper { flex-direction: column; }
+            .credit-side { border-right: none; border-bottom: 1px solid var(--border); }
+            .account-summary { flex-direction: column; align-items: flex-start; gap: 15px; }
+            .balance-box { width: 100%; text-align: left; box-sizing: border-box; }
+            .period-selector { flex-direction: column; align-items: stretch; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="brand-header">
+        <div class="brand-logo">VNET<span>SHOP</span></div>
+        <div style="font-size: 0.7rem; opacity: 0.8; font-weight: 600;">E-Statement</div>
+    </div>
+
+    <div class="period-selector">
+        <span class="label">Statement Period:</span>
+        <select onchange="window.location.href='/view/{{ request.path.split('/')[2] }}/set_month/' + this.value">
+            <option value="LIVE" {% if is_live %}selected{% endif %}>Current Month (Live)</option>
+            <optgroup label="Transaction History">
+                {% for file in files %}
+                <option value="{{ file }}" {% if current_month == file and not is_live %}selected{% endif %}>
+                    {{ file.replace('.db', '').replace('_', ' ') }}
+                </option>
+                {% endfor %}
+            </optgroup>
+        </select>
+    </div>
+
+    <div class="account-summary">
+        <div class="user-meta">
+            <span class="label">Customer Name</span>
+            <h2 style="margin: 2px 0 0 0; font-size: 1.3rem;">{{ username }}</h2>
+        </div>
+        <div class="balance-box">
+            <span class="label">Total Due ({{ current_month.replace('.db', '').replace('_', ' ') }})</span>
+            <span class="balance-val">Rs. {{ balance * -1 }}</span>
+        </div>
+    </div>
+
+    <div class="ledger-wrapper">
+        <div class="ledger-col">
+            <div class="side-title">Payments / Debits</div>
+            {% for row in rows if row[6] == 'take' %}
+            <div class="entry-row">
+                <div class="entry-info">
+                    <span class="entry-date">{{ row[3] }}</span>
+                    <span class="entry-desc">{{ row[4] }}</span>
+                </div>
+                <span class="amt-debit">{{ row[5] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="ledger-col credit-side">
+            <div class="side-title">Usage / Credits</div>
+            {% for row in rows if row[6] == 'give' %}
+            <div class="entry-row">
+                <div class="entry-info">
+                    <span class="entry-date">{{ row[3] }}</span>
+                    <span class="entry-desc">{{ row[4] }}</span>
+                </div>
+                <span class="amt-credit">{{ row[5] }}</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<div style="text-align: center; margin-top: 15px; font-size: 0.65rem; color: #94a3b8; padding-bottom: 15px;">
+    &copy; 2026 VNET Ledger System
+</div>
+
+</body>
+</html>
