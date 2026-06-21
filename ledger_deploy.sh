@@ -86,7 +86,7 @@ read -p "Choose an option (1-5): " MAIN_OPT
 
 if [ "$MAIN_OPT" == "1" ] || [ "$MAIN_OPT" == "2" ]; then
 
-    read -p "Enter Domain (e.g., ledger.vnet.store): " DOMAIN
+    read -p "Enter Domain (e.g., yourdomain.com): " DOMAIN
     read -p "Enter Nginx Port (e.g., 9000): " PORT
 
     select_release
