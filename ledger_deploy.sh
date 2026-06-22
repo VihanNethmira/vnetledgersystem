@@ -67,6 +67,46 @@ select_release() {
     echo ""
 }
 
+# Read Telegram credentials and write/update the env file
+configure_telegram() {
+    echo ""
+    echo "── Telegram Bot Configuration ───────────────────"
+
+    # If env file already exists, show current values
+    if [ -f "/etc/vnet_ledger.env" ]; then
+        CURRENT_TOKEN=$(grep TELEGRAM_BOT_TOKEN /etc/vnet_ledger.env | cut -d= -f2 | tr -d '"' || true)
+        CURRENT_CHAT=$(grep TELEGRAM_CHAT_ID   /etc/vnet_ledger.env | cut -d= -f2 | tr -d '"' || true)
+        echo "  Current token  : ${CURRENT_TOKEN:0:10}... (press Enter to keep)"
+        echo "  Current chat ID: $CURRENT_CHAT (press Enter to keep)"
+    fi
+
+    read -p "  Telegram Bot Token (leave blank to skip/keep): " INPUT_TOKEN
+    read -p "  Telegram Chat ID   (leave blank to skip/keep): " INPUT_CHAT
+
+    # Use existing values if user left blank
+    BOT_TOKEN="${INPUT_TOKEN:-$CURRENT_TOKEN}"
+    CHAT_ID="${INPUT_CHAT:-$CURRENT_CHAT}"
+
+    read -p "  Backup interval in seconds [3600]: " INPUT_INTERVAL
+    BACKUP_INTERVAL="${INPUT_INTERVAL:-3600}"
+
+    # Write env file (readable only by root)
+    cat <<EOF | sudo tee /etc/vnet_ledger.env > /dev/null
+TELEGRAM_BOT_TOKEN=$BOT_TOKEN
+TELEGRAM_CHAT_ID=$CHAT_ID
+BACKUP_INTERVAL_SECONDS=$BACKUP_INTERVAL
+VNET_BACKUP_PASSWORD=VNet18hai56f
+EOF
+    sudo chmod 600 /etc/vnet_ledger.env
+
+    if [ -n "$BOT_TOKEN" ] && [ -n "$CHAT_ID" ]; then
+        echo "  → Telegram configured. Bot will send hourly backups and respond to /start and /backup."
+    else
+        echo "  → Telegram not configured. Skipping bot features."
+    fi
+
+}
+
 # ─────────────────────────────────────────────
 #   MAIN MENU
 # ─────────────────────────────────────────────
@@ -74,11 +114,12 @@ select_release() {
 print_header
 echo "1. Full Install (Download Release)"
 echo "2. Update (Switch / Re-deploy Release)"
-echo "3. Uninstall / Remove System"
-echo "4. Check Service Status"
-echo "5. Exit"
+echo "3. Update Telegram Settings"
+echo "4. Uninstall / Remove System"
+echo "5. Check Service Status"
+echo "6. Exit"
 echo ""
-read -p "Choose an option (1-5): " MAIN_OPT
+read -p "Choose an option (1-6): " MAIN_OPT
 
 # ─────────────────────────────────────────────
 #   1 & 2 — INSTALL / UPDATE
@@ -86,10 +127,12 @@ read -p "Choose an option (1-5): " MAIN_OPT
 
 if [ "$MAIN_OPT" == "1" ] || [ "$MAIN_OPT" == "2" ]; then
 
-    read -p "Enter Domain (e.g., yourdomain.com): " DOMAIN
-    read -p "Enter Nginx Port (e.g., 9000): " PORT
+    read -p "Enter Domain (e.g., ledger.vnet.store): " DOMAIN
+    read -p "Enter Nginx Port (88/443/80/8443 — Telegram only allows these) [88]: " PORT
+    PORT="${PORT:-88}"
 
     select_release
+    configure_telegram
 
     # ── Dependencies ──────────────────────────────
     echo "[1/6] Installing system dependencies..."
@@ -163,7 +206,8 @@ After=network.target
 [Service]
 User=root
 WorkingDirectory=$WORK_DIR
-ExecStart=$WORK_DIR/venv/bin/gunicorn --workers 2 --bind 127.0.0.1:$APP_PORT app:app
+EnvironmentFile=/etc/vnet_ledger.env
+ExecStart=$WORK_DIR/venv/bin/gunicorn --workers 1 --bind 127.0.0.1:$APP_PORT app:app
 Restart=always
 RestartSec=5
 Environment="RELEASE=$SELECTED_TAG"
@@ -196,6 +240,8 @@ server {
     ssl_certificate     /etc/letsencrypt/live/$DOMAIN/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/$DOMAIN/privkey.pem;
 
+    client_max_body_size 50M;
+
     location / {
         proxy_pass         http://127.0.0.1:$APP_PORT;
         proxy_set_header   Host              \$host;
@@ -220,6 +266,21 @@ EOF
     sudo systemctl restart "$SERVICE_NAME"
     sudo systemctl start nginx
 
+    # ── Register Telegram Webhook ──────────────────
+    sleep 2
+    if [ -n "$BOT_TOKEN" ] && [ -n "$DOMAIN" ]; then
+        echo ""
+        echo "  → Registering Telegram webhook..."
+        WEBHOOK_URL="https://$DOMAIN:$PORT/telegram/webhook"
+        RESULT=$(curl -s "https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${WEBHOOK_URL}")
+        if echo "$RESULT" | grep -q '"ok":true'; then
+            echo "  → Webhook registered: $WEBHOOK_URL"
+        else
+            echo "  ⚠ Webhook registration failed. Register manually:"
+            echo "    https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${WEBHOOK_URL}"
+        fi
+    fi
+
     # ── Firewall ───────────────────────────────────
     sudo ufw allow "$PORT"/tcp 2>/dev/null || true
     sudo ufw reload 2>/dev/null || true
@@ -231,6 +292,9 @@ EOF
         echo "================================================"
         echo "  SUCCESS: Ledger $SELECTED_TAG is live!"
         echo "  URL    : https://$DOMAIN:$PORT"
+        if [ -n "$BOT_TOKEN" ]; then
+        echo "  BOT    : Active — send /start to your bot"
+        fi
         echo "================================================"
     else
         echo ""
@@ -241,16 +305,53 @@ EOF
     fi
 
 # ─────────────────────────────────────────────
-#   3 — UNINSTALL
+#   3 — UPDATE TELEGRAM SETTINGS ONLY
 # ─────────────────────────────────────────────
 
 elif [ "$MAIN_OPT" == "3" ]; then
+
+    read -p "Enter Domain (e.g., ledger.vnet.store): " DOMAIN
+    read -p "Enter Nginx Port (88/443/80/8443 — Telegram only allows these) [88]: " PORT
+    PORT="${PORT:-88}"
+
+    configure_telegram
+
+    # Restart service to pick up new env vars
+    sudo systemctl restart "$SERVICE_NAME" 2>/dev/null || true
+    sleep 2
+
+    # Re-register webhook with new token
+    if [ -n "$BOT_TOKEN" ] && [ -n "$DOMAIN" ]; then
+        echo ""
+        echo "  → Registering Telegram webhook..."
+        WEBHOOK_URL="https://$DOMAIN:$PORT/telegram/webhook"
+        RESULT=$(curl -s "https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${WEBHOOK_URL}")
+        if echo "$RESULT" | grep -q '"ok":true'; then
+            echo "  → Webhook registered: $WEBHOOK_URL"
+        else
+            echo "  ⚠ Webhook registration failed. Register manually:"
+            echo "    https://api.telegram.org/bot${BOT_TOKEN}/setWebhook?url=${WEBHOOK_URL}"
+        fi
+    fi
+
+    echo ""
+    echo "================================================"
+    echo "  Telegram settings updated & service restarted."
+    echo "  Send /start to your bot to verify."
+    echo "================================================"
+
+# ─────────────────────────────────────────────
+#   4 — UNINSTALL
+# ─────────────────────────────────────────────
+
+elif [ "$MAIN_OPT" == "4" ]; then
     read -p "Enter the Nginx Port to close: " UN_PORT
 
     echo "Removing VNET Ledger..."
     sudo systemctl stop "$SERVICE_NAME"    2>/dev/null || true
     sudo systemctl disable "$SERVICE_NAME" 2>/dev/null || true
     sudo rm -f /etc/systemd/system/"$SERVICE_NAME".service
+    sudo rm -f /etc/vnet_ledger.env
     sudo systemctl daemon-reload
 
     sudo rm -f /etc/nginx/sites-enabled/"$SERVICE_NAME"
@@ -268,16 +369,23 @@ elif [ "$MAIN_OPT" == "3" ]; then
     echo "Uninstall complete."
 
 # ─────────────────────────────────────────────
-#   4 — STATUS
+#   5 — STATUS
 # ─────────────────────────────────────────────
 
-elif [ "$MAIN_OPT" == "4" ]; then
+elif [ "$MAIN_OPT" == "5" ]; then
     echo ""
     echo "── App Service ─────────────────────────────────"
     sudo systemctl status "$SERVICE_NAME" --no-pager || true
     echo ""
     echo "── Recent App Logs ─────────────────────────────"
     sudo journalctl -u "$SERVICE_NAME" -n 20 --no-pager || true
+    echo ""
+    echo "── Telegram Env ────────────────────────────────"
+    if [ -f /etc/vnet_ledger.env ]; then
+        grep -v PASSWORD /etc/vnet_ledger.env || true
+    else
+        echo "  (no env file found)"
+    fi
     echo ""
     echo "── Nginx ───────────────────────────────────────"
     sudo systemctl status nginx --no-pager || true
