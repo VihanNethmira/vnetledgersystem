@@ -127,7 +127,7 @@ read -p "Choose an option (1-6): " MAIN_OPT
 
 if [ "$MAIN_OPT" == "1" ] || [ "$MAIN_OPT" == "2" ]; then
 
-    read -p "Enter Domain (e.g., ledger.vnet.store): " DOMAIN
+    read -p "Enter Domain (e.g., yourdomain.com): " DOMAIN
     read -p "Enter Nginx Port (88/443/80/8443 — Telegram only allows these) [88]: " PORT
     PORT="${PORT:-88}"
 
