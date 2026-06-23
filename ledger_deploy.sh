@@ -127,8 +127,8 @@ read -p "Choose an option (1-6): " MAIN_OPT
 
 if [ "$MAIN_OPT" == "1" ] || [ "$MAIN_OPT" == "2" ]; then
 
-    read -p "Enter Domain (e.g., yourdomain.com): " DOMAIN
-    read -p "Enter Nginx Port (88/443/80/8443 — Telegram only allows these) [88]: " PORT
+    read -p "Enter Ledger Domain (e.g., ledger2.vnet.store): " DOMAIN
+    read -p "Enter Nginx Port (88/8443 — Telegram allows these) [88]: " PORT
     PORT="${PORT:-88}"
 
     select_release
@@ -220,11 +220,17 @@ EOF
     echo "[6/6] Configuring SSL & Nginx..."
     sudo systemctl stop nginx 2>/dev/null || true
 
-    # Skip certbot if cert already exists for this domain
+    # Get SSL cert using DNS challenge (no port 80/443 needed — safe with 3x-ui)
     if [ ! -f "/etc/letsencrypt/live/$DOMAIN/fullchain.pem" ]; then
-        sudo certbot certonly --standalone \
+        echo ""
+        echo "  ── SSL Certificate (DNS Challenge) ──────────────"
+        echo "  Certbot will ask you to add a DNS TXT record."
+        echo "  Go to your DNS provider and add the record shown,"
+        echo "  then press Enter to continue."
+        echo "  ─────────────────────────────────────────────────"
+        sudo certbot certonly --manual \
+            --preferred-challenges dns \
             -d "$DOMAIN" \
-            --non-interactive \
             --agree-tos \
             --register-unsafely-without-email
     else
@@ -232,6 +238,8 @@ EOF
     fi
 
     # ── Nginx Config ───────────────────────────────
+    # Only the ledger domain is configured here.
+    # The primary domain is managed separately by 3x-ui.
     cat <<EOF | sudo tee /etc/nginx/sites-available/${SERVICE_NAME} > /dev/null
 server {
     listen $PORT ssl;
@@ -310,8 +318,8 @@ EOF
 
 elif [ "$MAIN_OPT" == "3" ]; then
 
-    read -p "Enter Domain (e.g., ledger.vnet.store): " DOMAIN
-    read -p "Enter Nginx Port (88/443/80/8443 — Telegram only allows these) [88]: " PORT
+    read -p "Enter Ledger Domain (e.g., ledger2.vnet.store): " DOMAIN
+    read -p "Enter Nginx Port (88/8443 — Telegram allows these) [88]: " PORT
     PORT="${PORT:-88}"
 
     configure_telegram
